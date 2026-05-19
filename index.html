@@ -6,146 +6,213 @@
 <title>CV Builder Pro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222;min-height:100vh}
-  .app{display:flex;height:100vh;overflow:hidden}
-  .sidebar{width:380px;min-width:320px;background:#fff;border-right:1px solid #e0e0e0;overflow-y:auto;display:flex;flex-direction:column}
-  .sidebar-header{padding:18px 20px 14px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:10px;position:sticky;top:0;background:#fff;z-index:10}
-  .sidebar-header h1{font-size:16px;font-weight:600;color:#1a1a2e}
-  .logo{width:28px;height:28px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700}
-  .tabs{display:flex;padding:10px 20px 0;gap:4px;border-bottom:1px solid #eee;overflow-x:auto}
-  .tab{padding:7px 13px;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;border-radius:8px 8px 0 0;color:#777;white-space:nowrap;border-bottom:2px solid transparent}
-  .tab.active{color:#667eea;border-bottom:2px solid #667eea;background:#f5f4ff}
-  .tab-content{display:none;padding:16px 20px;flex:1}
-  .tab-content.active{display:block}
-  .field{margin-bottom:14px}
-  .field label{display:block;font-size:11px;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
-  .field input,.field textarea,.field select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;color:#222;background:#fafafa;transition:border .2s}
-  .field input:focus,.field textarea:focus{outline:none;border-color:#667eea;background:#fff}
-  .field textarea{resize:vertical;min-height:70px;line-height:1.5}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .section-title{font-size:13px;font-weight:600;color:#1a1a2e;margin:18px 0 10px;display:flex;justify-content:space-between;align-items:center}
-  .add-btn{font-size:11px;padding:4px 10px;background:#667eea;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500}
-  .add-btn:hover{background:#5567d4}
-  .item-card{background:#f8f9ff;border:1px solid #e8e8f0;border-radius:10px;padding:12px;margin-bottom:10px;position:relative}
-  .item-card .del-btn{position:absolute;top:8px;right:8px;background:none;border:none;color:#bbb;cursor:pointer;font-size:16px;line-height:1}
-  .item-card .del-btn:hover{color:#e55}
-  .skill-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-  .skill-tag{background:#ede9ff;color:#5548c8;font-size:12px;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px}
-  .skill-tag button{background:none;border:none;cursor:pointer;color:#9991e8;font-size:12px;line-height:1;padding:0}
-  .skill-input-row{display:flex;gap:6px}
-  .skill-input-row input{flex:1}
-  .skill-input-row button{padding:8px 12px;background:#667eea;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px}
-  .template-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
-  .tpl-card{border:2px solid #e0e0e0;border-radius:10px;padding:10px;cursor:pointer;text-align:center;transition:all .2s}
-  .tpl-card.selected{border-color:#667eea;background:#f5f4ff}
-  .tpl-card .tpl-preview{height:60px;border-radius:6px;margin-bottom:6px}
-  .tpl-card span{font-size:11px;font-weight:600;color:#555}
-  .accent-row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
-  .accent-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:3px solid transparent}
-  .accent-dot.selected{border-color:#333}
-  .export-btn{margin:16px 20px;padding:11px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s}
-  .export-btn:hover{opacity:.9}
-  .preview-area{flex:1;overflow-y:auto;background:#e8eaf0;display:flex;flex-direction:column;align-items:center;padding:24px 20px}
-  .preview-toolbar{width:100%;max-width:720px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-  .preview-toolbar span{font-size:12px;color:#888;font-weight:500}
-  .zoom-btns{display:flex;gap:6px}
-  .zoom-btns button{width:28px;height:28px;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer;font-size:14px}
-  #cv-page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.12);border-radius:4px;transform-origin:top center;transition:transform .2s}
-  .cv-header{padding:36px 40px 28px;display:flex;align-items:center;gap:24px}
-  .cv-avatar{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;flex-shrink:0;text-transform:uppercase;overflow:hidden}
-  .cv-name{font-size:26px;font-weight:700;color:#1a1a2e;margin-bottom:4px}
-  .cv-title{font-size:14px;font-weight:500;opacity:.85;margin-bottom:10px}
-  .cv-contacts{display:flex;flex-wrap:wrap;gap:10px}
-  .cv-contact{font-size:11.5px;display:flex;align-items:center;gap:4px;color:#555}
-  .cv-body{display:grid;grid-template-columns:1fr 2fr;gap:0}
-  .cv-left{padding:0 0 36px 40px}
-  .cv-right{padding:0 40px 36px 28px;border-left:1px solid #eee}
-  .cv-section{margin-bottom:22px}
-  .cv-sec-title{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px;padding-bottom:5px;border-bottom:2px solid currentColor}
-  .cv-entry{margin-bottom:14px}
-  .cv-entry-title{font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:1px}
-  .cv-entry-sub{font-size:11.5px;font-weight:600;margin-bottom:2px}
-  .cv-entry-date{font-size:10.5px;color:#888;margin-bottom:4px}
-  .cv-entry-desc{font-size:11.5px;color:#444;line-height:1.55}
-  .cv-skill-item{margin-bottom:8px}
-  .cv-skill-name{font-size:11.5px;font-weight:600;color:#333;margin-bottom:3px}
-  .cv-skill-bar{height:4px;background:#eee;border-radius:2px;overflow:hidden}
-  .cv-skill-fill{height:100%;border-radius:2px;width:80%}
-  .cv-summary{font-size:12px;color:#444;line-height:1.65}
-  .cv-lang{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:6px}
-  .cv-lang-level{font-weight:600}
-  body.tpl-modern .cv-header{background:linear-gradient(135deg,var(--accent),#764ba2)}
-  body.tpl-modern .cv-name{color:#fff}
-  body.tpl-modern .cv-title{color:rgba(255,255,255,.85)}
-  body.tpl-modern .cv-contact{color:rgba(255,255,255,.85)}
-  body.tpl-classic .cv-header{background:#f8f8f8;border-bottom:3px solid var(--accent)}
-  body.tpl-classic .cv-avatar{border:3px solid var(--accent)}
-  body.tpl-minimal .cv-header{border-left:5px solid var(--accent);padding-left:35px}
-  body.tpl-minimal .cv-avatar{display:none}
-  body.tpl-sidebar .cv-left{background:#1a1a2e;padding-top:24px}
-  body.tpl-sidebar .cv-left .cv-sec-title{color:#ccc!important}
-  body.tpl-sidebar .cv-left .cv-skill-name{color:#eee}
-  body.tpl-sidebar .cv-left .cv-entry-title{color:#fff}
-  body.tpl-sidebar .cv-left .cv-entry-sub{color:#ccc}
-  body.tpl-sidebar .cv-left .cv-entry-date{color:#aaa}
-  body.tpl-sidebar .cv-left .cv-entry-desc{color:#bbb}
-  body.tpl-sidebar .cv-left .cv-contact{color:#ccc}
-  body.tpl-sidebar .cv-left .cv-summary{color:#bbb}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--accent:#667eea;--sidebar-w:360px}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222;min-height:100vh}
+
+/* ===== LAYOUT ===== */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sidebar-w);min-width:280px;background:#fff;border-right:1px solid #e0e0e0;overflow-y:auto;display:flex;flex-direction:column;transition:transform .3s}
+.preview-area{flex:1;overflow-y:auto;background:#e8eaf0;display:flex;flex-direction:column;align-items:center;padding:20px 16px}
+
+/* ===== MOBILE OVERLAY ===== */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99}
+.overlay.show{display:block}
+
+/* ===== TOPBAR (mobile) ===== */
+.topbar{display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:#fff;border-bottom:1px solid #eee;position:sticky;top:0;z-index:50}
+.topbar h1{font-size:15px;font-weight:700;color:#1a1a2e}
+.topbar-btns{display:flex;gap:8px}
+.topbar-btns button{padding:7px 12px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+.btn-form{background:#667eea;color:#fff}
+.btn-export{background:#27ae60;color:#fff}
+.hamburger{background:none;border:none;font-size:22px;cursor:pointer;color:#333}
+
+/* ===== SIDEBAR HEADER ===== */
+.sidebar-header{padding:16px 18px 12px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:10}
+.sidebar-header-left{display:flex;align-items:center;gap:10px}
+.logo{width:28px;height:28px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0}
+.sidebar-header h1{font-size:15px;font-weight:700;color:#1a1a2e}
+.close-sidebar{display:none;background:none;border:none;font-size:20px;cursor:pointer;color:#888;padding:4px}
+
+/* ===== TABS ===== */
+.tabs{display:flex;padding:8px 16px 0;gap:2px;border-bottom:1px solid #eee;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:7px 11px;font-size:11.5px;font-weight:500;border:none;background:none;cursor:pointer;border-radius:8px 8px 0 0;color:#777;white-space:nowrap;border-bottom:2px solid transparent;flex-shrink:0}
+.tab.active{color:#667eea;border-bottom:2px solid #667eea;background:#f5f4ff}
+.tab-content{display:none;padding:14px 18px;flex:1}
+.tab-content.active{display:block}
+
+/* ===== FORM FIELDS ===== */
+.field{margin-bottom:13px}
+.field label{display:block;font-size:10.5px;font-weight:700;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.field input,.field textarea,.field select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;color:#222;background:#fafafa;transition:border .2s;-webkit-appearance:none}
+.field input:focus,.field textarea:focus{outline:none;border-color:#667eea;background:#fff}
+.field textarea{resize:vertical;min-height:68px;line-height:1.5}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.section-title{font-size:13px;font-weight:700;color:#1a1a2e;margin:16px 0 10px;display:flex;justify-content:space-between;align-items:center}
+.add-btn{font-size:11px;padding:4px 10px;background:#667eea;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600}
+.item-card{background:#f8f9ff;border:1px solid #e8e8f0;border-radius:10px;padding:12px;margin-bottom:10px;position:relative}
+.item-card .del-btn{position:absolute;top:8px;right:8px;background:none;border:none;color:#ccc;cursor:pointer;font-size:18px;line-height:1;padding:2px 6px}
+.item-card .del-btn:hover{color:#e55}
+.skill-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.skill-tag{background:#ede9ff;color:#5548c8;font-size:12px;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px}
+.skill-tag button{background:none;border:none;cursor:pointer;color:#9991e8;font-size:13px;line-height:1;padding:0}
+.skill-input-row{display:flex;gap:6px;margin-top:8px}
+.skill-input-row input{flex:1;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:#fafafa}
+.skill-input-row button{padding:8px 14px;background:#667eea;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px}
+.template-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.tpl-card{border:2px solid #e0e0e0;border-radius:10px;padding:10px;cursor:pointer;text-align:center;transition:all .2s}
+.tpl-card.selected{border-color:#667eea;background:#f5f4ff}
+.tpl-card .tpl-preview{height:56px;border-radius:6px;margin-bottom:6px}
+.tpl-card span{font-size:11px;font-weight:700;color:#555}
+.accent-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.accent-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .15s}
+.accent-dot.selected{border-color:#333;transform:scale(1.15)}
+.export-btn{margin:14px 18px 18px;padding:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.export-btn:active{opacity:.85}
+
+/* ===== PREVIEW TOOLBAR ===== */
+.preview-toolbar{width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.preview-toolbar span{font-size:12px;color:#888;font-weight:500}
+.zoom-btns{display:flex;gap:6px}
+.zoom-btns button{width:30px;height:30px;border:1px solid #ccc;background:#fff;border-radius:7px;cursor:pointer;font-size:15px}
+
+/* ===== CV PAGE ===== */
+#cv-page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.12);border-radius:4px;transform-origin:top center;transition:transform .2s}
+.cv-header{padding:32px 36px 24px;display:flex;align-items:center;gap:20px}
+.cv-avatar{width:78px;height:78px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;flex-shrink:0;text-transform:uppercase;overflow:hidden}
+.cv-name{font-size:24px;font-weight:700;color:#1a1a2e;margin-bottom:3px}
+.cv-title-text{font-size:13px;font-weight:500;margin-bottom:9px}
+.cv-contacts{display:flex;flex-wrap:wrap;gap:8px}
+.cv-contact{font-size:11px;display:flex;align-items:center;gap:3px;color:#555}
+.cv-body{display:grid;grid-template-columns:1fr 2fr}
+.cv-left{padding:0 0 32px 36px}
+.cv-right{padding:0 36px 32px 24px;border-left:1px solid #eee}
+.cv-section{margin-bottom:20px}
+.cv-sec-title{font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px;padding-bottom:5px;border-bottom:2px solid currentColor}
+.cv-entry{margin-bottom:13px}
+.cv-entry-title{font-size:12.5px;font-weight:700;color:#1a1a2e;margin-bottom:1px}
+.cv-entry-sub{font-size:11px;font-weight:600;margin-bottom:2px}
+.cv-entry-date{font-size:10px;color:#888;margin-bottom:3px}
+.cv-entry-desc{font-size:11px;color:#444;line-height:1.55}
+.cv-skill-item{margin-bottom:8px}
+.cv-skill-name{font-size:11px;font-weight:600;color:#333;margin-bottom:3px}
+.cv-skill-bar{height:4px;background:#eee;border-radius:2px;overflow:hidden}
+.cv-skill-fill{height:100%;border-radius:2px}
+.cv-summary{font-size:11.5px;color:#444;line-height:1.65}
+.cv-lang{display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px}
+.cv-lang-level{font-weight:700}
+
+/* ===== TEMPLATES ===== */
+body.tpl-modern .cv-header{background:linear-gradient(135deg,var(--accent),#764ba2)}
+body.tpl-modern .cv-name{color:#fff}
+body.tpl-modern .cv-title-text{color:rgba(255,255,255,.85)}
+body.tpl-modern .cv-contact{color:rgba(255,255,255,.85)}
+body.tpl-classic .cv-header{background:#f8f8f8;border-bottom:3px solid var(--accent)}
+body.tpl-classic .cv-avatar{border:3px solid var(--accent)}
+body.tpl-minimal .cv-header{border-left:5px solid var(--accent);padding-left:31px}
+body.tpl-minimal .cv-avatar{display:none}
+body.tpl-sidebar .cv-left{background:#1a1a2e;padding-top:20px}
+body.tpl-sidebar .cv-left .cv-sec-title{color:#aaa!important}
+body.tpl-sidebar .cv-left .cv-skill-name{color:#eee}
+body.tpl-sidebar .cv-left .cv-entry-title{color:#fff}
+body.tpl-sidebar .cv-left .cv-entry-sub{color:#ccc}
+body.tpl-sidebar .cv-left .cv-entry-date{color:#aaa}
+body.tpl-sidebar .cv-left .cv-entry-desc{color:#bbb}
+body.tpl-sidebar .cv-left .cv-contact{color:#ccc}
+body.tpl-sidebar .cv-left .cv-summary{color:#bbb}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .app{flex-direction:column;height:auto;overflow:auto}
+  .topbar{display:flex}
+  .sidebar{position:fixed;top:0;left:0;height:100vh;z-index:100;transform:translateX(-100%);width:min(360px,90vw)}
+  .sidebar.open{transform:translateX(0)}
+  .close-sidebar{display:block}
+  .preview-area{padding:12px 8px;min-height:100vh}
+  #cv-page{transform-origin:top center}
+  .preview-toolbar{display:none}
+}
+@media(max-width:480px){
+  .row2{grid-template-columns:1fr}
+  .template-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body class="tpl-modern" style="--accent:#667eea">
+
+<!-- TOPBAR (mobile/tablet) -->
+<div class="topbar">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <h1>CV Builder Pro</h1>
+  <div class="topbar-btns">
+    <button class="btn-export" onclick="exportPDF()">⬇ PDF</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
 <div class="app">
-  <div class="sidebar">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="logo">CV</div>
-      <h1>CV Builder Pro</h1>
-    </div>
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('personal')">👤 Cá nhân</button>
-      <button class="tab" onclick="switchTab('experience')">💼 Kinh nghiệm</button>
-      <button class="tab" onclick="switchTab('education')">🎓 Học vấn</button>
-      <button class="tab" onclick="switchTab('skills')">⚡ Kỹ năng</button>
-      <button class="tab" onclick="switchTab('design')">🎨 Thiết kế</button>
+      <div class="sidebar-header-left">
+        <div class="logo">CV</div>
+        <h1>CV Builder Pro</h1>
+      </div>
+      <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
     </div>
 
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('personal')">👤 Cá nhân</button>
+      <button class="tab" onclick="switchTab('experience')">💼 KN</button>
+      <button class="tab" onclick="switchTab('education')">🎓 HV</button>
+      <button class="tab" onclick="switchTab('skills')">⚡ KN</button>
+      <button class="tab" onclick="switchTab('design')">🎨 TK</button>
+    </div>
+
+    <!-- CÁ NHÂN -->
     <div class="tab-content active" id="tab-personal">
       <div class="field">
         <label>Ảnh đại diện</label>
         <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
-          <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;background:#ede9ff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#667eea;overflow:hidden;flex-shrink:0;border:2px dashed #c4b8f5;cursor:pointer" onclick="document.getElementById('avatar-input').click()">+</div>
+          <div id="avatar-preview" onclick="document.getElementById('avatar-input').click()" style="width:60px;height:60px;border-radius:50%;background:#ede9ff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#667eea;overflow:hidden;flex-shrink:0;border:2px dashed #c4b8f5;cursor:pointer">+</div>
           <div>
             <button onclick="document.getElementById('avatar-input').click()" style="padding:7px 14px;background:#667eea;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">Tải ảnh lên</button>
-            <button id="remove-avatar-btn" onclick="removeAvatar()" style="display:none;padding:7px 12px;background:none;color:#e55;border:1px solid #e55;border-radius:8px;cursor:pointer;font-size:12px;margin-left:6px">Xoá</button>
-            <p style="font-size:11px;color:#999;margin-top:5px">JPG, PNG — tối đa 5MB</p>
+            <button id="remove-avatar-btn" onclick="removeAvatar()" style="display:none;padding:7px 10px;background:none;color:#e55;border:1px solid #e55;border-radius:8px;cursor:pointer;font-size:12px;margin-left:6px">Xoá</button>
+            <p style="font-size:10.5px;color:#999;margin-top:5px">JPG, PNG — tối đa 5MB</p>
           </div>
         </div>
         <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="handleAvatar(this)">
       </div>
       <div class="field"><label>Họ và tên</label><input id="f-name" oninput="render()" placeholder="Nguyễn Đăng Thạch"></div>
       <div class="field"><label>Chức danh</label><input id="f-title" oninput="render()" placeholder="Senior Frontend Developer"></div>
-      <div class="field"><label>Email</label><input id="f-email" oninput="render()" placeholder="thach.nguyendang.444@gmail.com"></div>
+      <div class="field"><label>Email</label><input id="f-email" oninput="render()" placeholder="thach.nguyendang.444@gmail.com" type="email"></div>
       <div class="row2">
-        <div class="field"><label>Điện thoại</label><input id="f-phone" oninput="render()" placeholder="0706 201 261"></div>
+        <div class="field"><label>Điện thoại</label><input id="f-phone" oninput="render()" placeholder="0706 201 261" type="tel"></div>
         <div class="field"><label>Địa chỉ</label><input id="f-address" oninput="render()" placeholder="TP.HCM"></div>
       </div>
       <div class="row2">
         <div class="field"><label>LinkedIn</label><input id="f-linkedin" oninput="render()" placeholder="linkedin.com/in/..."></div>
         <div class="field"><label>Website/GitHub</label><input id="f-website" oninput="render()" placeholder="github.com/..."></div>
       </div>
-      <div class="field"><label>Tóm tắt bản thân</label><textarea id="f-summary" oninput="render()" placeholder="Giới thiệu ngắn gọn về bạn..."></textarea></div>
+      <div class="field"><label>Tóm tắt bản thân</label><textarea id="f-summary" oninput="render()" placeholder="Giới thiệu ngắn gọn về bạn, thế mạnh và mục tiêu nghề nghiệp..."></textarea></div>
     </div>
 
+    <!-- KINH NGHIỆM -->
     <div class="tab-content" id="tab-experience">
-      <div class="section-title">Kinh nghiệm làm việc <button class="add-btn" onclick="addExp()">+ Thêm</button></div>
+      <div class="section-title">Kinh nghiệm <button class="add-btn" onclick="addExp()">+ Thêm</button></div>
       <div id="exp-list"></div>
     </div>
 
+    <!-- HỌC VẤN -->
     <div class="tab-content" id="tab-education">
       <div class="section-title">Học vấn <button class="add-btn" onclick="addEdu()">+ Thêm</button></div>
       <div id="edu-list"></div>
     </div>
 
+    <!-- KỸ NĂNG -->
     <div class="tab-content" id="tab-skills">
       <div class="section-title">Kỹ năng chuyên môn</div>
       <div id="skill-list"></div>
@@ -153,17 +220,18 @@
         <input id="skill-input" placeholder="Thêm kỹ năng..." onkeydown="if(event.key==='Enter')addSkill()">
         <button onclick="addSkill()">+</button>
       </div>
-      <div class="section-title" style="margin-top:20px">Ngôn ngữ</div>
+      <div class="section-title" style="margin-top:18px">Ngôn ngữ</div>
       <div id="lang-list"></div>
-      <div style="display:flex;gap:6px;margin-top:6px">
-        <input id="lang-input" placeholder="Ngôn ngữ" style="flex:1;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <input id="lang-input" placeholder="Ngôn ngữ" style="flex:1;min-width:100px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:#fafafa">
         <select id="lang-level" style="padding:8px;border:1px solid #ddd;border-radius:8px;font-size:12px;background:#fafafa">
           <option>Cơ bản</option><option>Giao tiếp</option><option selected>Thành thạo</option><option>Bản ngữ</option>
         </select>
-        <button onclick="addLang()" style="padding:8px 12px;background:#667eea;color:#fff;border:none;border-radius:8px;cursor:pointer">+</button>
+        <button onclick="addLang()" style="padding:8px 12px;background:#667eea;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px">+</button>
       </div>
     </div>
 
+    <!-- THIẾT KẾ -->
     <div class="tab-content" id="tab-design">
       <div class="section-title">Mẫu CV</div>
       <div class="template-grid">
@@ -184,7 +252,7 @@
           <span>Sidebar</span>
         </div>
       </div>
-      <div class="section-title" style="margin-top:20px">Màu sắc chủ đạo</div>
+      <div class="section-title" style="margin-top:18px">Màu sắc</div>
       <div class="accent-row">
         <div class="accent-dot selected" style="background:#667eea" data-color="#667eea" onclick="setAccent(this)"></div>
         <div class="accent-dot" style="background:#e74c3c" data-color="#e74c3c" onclick="setAccent(this)"></div>
@@ -195,12 +263,11 @@
         <div class="accent-dot" style="background:#e91e8c" data-color="#e91e8c" onclick="setAccent(this)"></div>
         <div class="accent-dot" style="background:#ff6b35" data-color="#ff6b35" onclick="setAccent(this)"></div>
       </div>
-      <div class="section-title" style="margin-top:20px">Font chữ</div>
+      <div class="section-title" style="margin-top:18px">Font chữ</div>
       <div class="field">
         <select id="font-select" onchange="setFont()">
           <option value="'Segoe UI',sans-serif">Segoe UI (Mặc định)</option>
           <option value="Georgia,serif">Georgia (Serif)</option>
-          <option value="'Courier New',monospace">Courier New (Mono)</option>
           <option value="Arial,sans-serif">Arial</option>
           <option value="'Times New Roman',serif">Times New Roman</option>
         </select>
@@ -210,21 +277,23 @@
     <button class="export-btn" onclick="exportPDF()">⬇️ Xuất PDF</button>
   </div>
 
+  <!-- PREVIEW -->
   <div class="preview-area">
     <div class="preview-toolbar">
       <span>Xem trước CV</span>
       <div class="zoom-btns">
         <button onclick="zoom(-0.1)">−</button>
         <button onclick="zoom(0.1)">+</button>
-        <button onclick="zoomLevel=0.85;applyZoom()">⊡</button>
+        <button onclick="zoomLevel=0.82;applyZoom()">⊡</button>
       </div>
     </div>
+
     <div id="cv-page">
       <div class="cv-header">
         <div class="cv-avatar" id="cv-avatar" style="background:rgba(255,255,255,.25)">VA</div>
         <div style="flex:1">
           <div class="cv-name" id="cv-name">Nguyễn Đăng Thạch</div>
-          <div class="cv-title" id="cv-title" style="color:rgba(255,255,255,.85)">Senior Frontend Developer</div>
+          <div class="cv-title-text" id="cv-title-disp" style="color:rgba(255,255,255,.85)">Senior Frontend Developer</div>
           <div class="cv-contacts" id="cv-contacts">
             <span class="cv-contact">✉ thach.nguyendang.444@gmail.com</span>
             <span class="cv-contact">📱 0706 201 261</span>
@@ -265,8 +334,12 @@ let exps=[{id:1,company:'Công ty ABC Tech',pos:'Frontend Developer',from:'01/20
 let edus=[{id:1,school:'Đại học Gia Định',major:'Digital Marketing',year:'2018-2022',gpa:'3.6/4.0'}];
 let skills=[{name:'React / Vue.js',level:90},{name:'JavaScript / TypeScript',level:85},{name:'Node.js',level:70},{name:'UI/UX Design',level:75}];
 let langs=[{lang:'Tiếng Anh',level:'Thành thạo'},{lang:'Tiếng Việt',level:'Bản ngữ'}];
-let currentTpl='modern',currentAccent='#667eea',zoomLevel=0.85;
+let currentTpl='modern',currentAccent='#667eea',zoomLevel=0.82;
 
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
 function handleAvatar(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
@@ -285,8 +358,7 @@ function removeAvatar(){
   const p=document.getElementById('avatar-preview');
   p.innerHTML='+';p.style.border='2px dashed #c4b8f5';
   document.getElementById('remove-avatar-btn').style.display='none';
-  document.getElementById('avatar-input').value='';
-  render();
+  document.getElementById('avatar-input').value='';render();
 }
 function switchTab(name){
   const names=['personal','experience','education','skills','design'];
@@ -315,8 +387,14 @@ function setAccent(el){
   document.querySelectorAll('.cv-sec-title').forEach(t=>t.style.color=currentAccent);
 }
 function setFont(){document.getElementById('cv-page').style.fontFamily=document.getElementById('font-select').value;}
-function zoom(d){zoomLevel=Math.min(1.2,Math.max(0.5,zoomLevel+d));applyZoom();}
+function zoom(d){zoomLevel=Math.min(1.2,Math.max(0.4,zoomLevel+d));applyZoom();}
 function applyZoom(){document.getElementById('cv-page').style.transform=`scale(${zoomLevel})`;}
+function autoZoom(){
+  const w=document.querySelector('.preview-area').offsetWidth-32;
+  const cvW=794;
+  zoomLevel=Math.min(0.95,w/cvW);
+  applyZoom();
+}
 function getInitials(n){return(n||'').split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase()||'?';}
 
 function renderSidebar(){
@@ -329,7 +407,7 @@ function renderSidebar(){
         <div class="field"><label>Từ</label><input value="${e.from||''}" oninput="exps.find(x=>x.id==${e.id}).from=this.value;render()" placeholder="MM/YYYY"></div>
         <div class="field"><label>Đến</label><input value="${e.to||''}" oninput="exps.find(x=>x.id==${e.id}).to=this.value;render()" placeholder="Hiện tại"></div>
       </div>
-      <div class="field"><label>Mô tả</label><textarea oninput="exps.find(x=>x.id==${e.id}).desc=this.value;render()" placeholder="Mô tả công việc...">${e.desc||''}</textarea></div>
+      <div class="field"><label>Mô tả</label><textarea oninput="exps.find(x=>x.id==${e.id}).desc=this.value;render()" placeholder="Mô tả công việc, thành tích...">${e.desc||''}</textarea></div>
     </div>`).join('');
   document.getElementById('edu-list').innerHTML=edus.map(e=>`
     <div class="item-card">
@@ -355,7 +433,7 @@ function render(){
   const website=document.getElementById('f-website').value;
   const summary=document.getElementById('f-summary').value;
   document.getElementById('cv-name').textContent=name;
-  document.getElementById('cv-title').textContent=title;
+  document.getElementById('cv-title-disp').textContent=title;
   const av=document.getElementById('cv-avatar');
   if(avatarDataUrl){av.innerHTML=`<img src="${avatarDataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;av.style.background='transparent';}
   else{av.innerHTML=getInitials(name);av.style.background=currentAccent+'55';}
@@ -384,7 +462,8 @@ function exportPDF(){
   html2pdf().set({margin:0,filename:`${name.replace(/\s+/g,'_')}_CV.pdf`,image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(el).save().then(()=>{el.style.transform=orig});
 }
 
-renderSidebar();render();applyZoom();
+renderSidebar();render();autoZoom();
+window.addEventListener('resize',autoZoom);
 </script>
 </body>
 </html>
