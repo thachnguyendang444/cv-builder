@@ -35,10 +35,22 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222;min-height:
 .sidebar-header h1{font-size:15px;font-weight:700;color:#1a1a2e}
 .close-sidebar{display:none;background:none;border:none;font-size:20px;cursor:pointer;color:#888;padding:4px}
 
+/* ===== TABS WRAPPER WITH SCROLL BUTTONS ===== */
+.tabs-wrapper{position:relative;display:flex;align-items:center;padding:0 8px;border-bottom:1px solid #eee;background:#fff;gap:4px}
+
+.tabs-scroll-btn{display:none;background:none;border:none;font-size:18px;cursor:pointer;color:#667eea;padding:8px;flex-shrink:0;transition:opacity .2s,color .2s}
+.tabs-scroll-btn:hover:not(:disabled){opacity:.7}
+.tabs-scroll-btn:disabled{opacity:.25;cursor:not-allowed;color:#ccc}
+
 /* ===== TABS ===== */
-.tabs{display:flex;padding:8px 16px 0;gap:2px;border-bottom:1px solid #eee;overflow-x:auto;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tab{padding:7px 11px;font-size:11.5px;font-weight:500;border:none;background:none;cursor:pointer;border-radius:8px 8px 0 0;color:#777;white-space:nowrap;border-bottom:2px solid transparent;flex-shrink:0}
+.tabs{display:flex;padding:0;gap:2px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scroll-behavior:smooth;flex:1;margin:0;max-width:100%}
+.tabs::-webkit-scrollbar{height:3px}
+.tabs::-webkit-scrollbar-track{background:#f0f0f0;border-radius:2px}
+.tabs::-webkit-scrollbar-thumb{background:#d0d0d0;border-radius:2px}
+.tabs::-webkit-scrollbar-thumb:hover{background:#b0b0b0}
+
+.tab{padding:7px 11px;font-size:11.5px;font-weight:500;border:none;background:none;cursor:pointer;border-radius:8px 8px 0 0;color:#777;white-space:nowrap;border-bottom:2px solid transparent;flex-shrink:0;transition:all .2s}
+.tab:hover{background:#f5f5f5}
 .tab.active{color:#667eea;border-bottom:2px solid #667eea;background:#f5f4ff}
 .tab-content{display:none;padding:14px 18px;flex:1;overflow-y:auto}
 .tab-content.active{display:block}
@@ -69,13 +81,13 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222;min-height:
 .accent-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
 .accent-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .15s}
 .accent-dot.selected{border-color:#333;transform:scale(1.15)}
-.export-btn{margin:14px 18px 18px;padding:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 36px)}
+.export-btn{margin:14px 18px 18px;padding:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s}
 .export-btn:active{opacity:.85}
 
 /* ===== AVATAR SECTION ===== */
 .avatar-wrapper{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
 .avatar-preview-box{flex-shrink:0;display:flex}
-#avatar-preview{width:50px;height:50px;min-width:50px;border-radius:50%;background:#ede9ff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#667eea;cursor:pointer;border:2px dashed #c4b8f5;transition:all .2s;user-select:none}
+#avatar-preview{width:50px;height:50px;min-width:50px;border-radius:50%;background:#ede9ff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#667eea;cursor:pointer;border:2px dashed #c4b8f5;transition:all .2s}
 #avatar-preview:hover{border-color:#667eea;background:#f5f4ff}
 .avatar-btns{display:flex;flex-direction:column;gap:6px;flex:1}
 .avatar-btns button{padding:6px 10px;font-size:11px;font-weight:600;border-radius:6px;border:none;cursor:pointer;transition:all .2s}
@@ -149,6 +161,7 @@ body.tpl-sidebar .cv-left .cv-summary{color:#bbb}
   .avatar-wrapper{gap:8px}
   #avatar-preview{width:45px;height:45px;min-width:45px;font-size:16px}
   .avatar-btns button{padding:5px 8px;font-size:10px}
+  .tabs-scroll-btn{display:block}
 }
 @media(max-width:480px){
   .row2{grid-template-columns:1fr}
@@ -188,12 +201,16 @@ body.tpl-sidebar .cv-left .cv-summary{color:#bbb}
       <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
     </div>
 
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('personal')">👤 Cá nhân</button>
-      <button class="tab" onclick="switchTab('experience')">💼 Kinh nghiệm</button>
-      <button class="tab" onclick="switchTab('education')">🎓 Học Vấn</button>
-      <button class="tab" onclick="switchTab('skills')">⚡ Kỹ năng</button>
-      <button class="tab" onclick="switchTab('design')">🎨 Thiết kế</button>
+    <div class="tabs-wrapper">
+      <button class="tabs-scroll-btn" id="tabs-prev" onclick="scrollTabs(-1)">‹</button>
+      <div class="tabs" id="tabs-container">
+        <button class="tab active" onclick="switchTab('personal')">👤 Cá nhân</button>
+        <button class="tab" onclick="switchTab('experience')">💼 Kinh nghiệm</button>
+        <button class="tab" onclick="switchTab('education')">🎓 Học Vấn</button>
+        <button class="tab" onclick="switchTab('skills')">⚡ Kỹ năng</button>
+        <button class="tab" onclick="switchTab('design')">🎨 Thiết kế</button>
+      </div>
+      <button class="tabs-scroll-btn" id="tabs-next" onclick="scrollTabs(1)">›</button>
     </div>
 
     <!-- CÁ NHÂN -->
@@ -223,7 +240,7 @@ body.tpl-sidebar .cv-left .cv-summary{color:#bbb}
         <div class="field"><label>LinkedIn</label><input id="f-linkedin" oninput="render()" placeholder="linkedin.com/in/..."></div>
         <div class="field"><label>Website/GitHub</label><input id="f-website" oninput="render()" placeholder="github.com/..."></div>
       </div>
-      <div class="field"><label>Tóm tắt bản thân</label><textarea id="f-summary" oninput="render()" placeholder="Giới thiệu ngắn gọn về bạn, thế mạnh và mục tiêu nghề nghiệp..."></textarea></div>
+      <div class="field"><label>Tóm tắt bản thân</label><textarea id="f-summary" oninput="render()" placeholder="Giới thiệu ngắn gọn về bạn, thế mạnh và mục tiêu nghề nghiệp"></textarea></div>
     </div>
 
     <!-- KINH NGHIỆM -->
@@ -356,7 +373,7 @@ body.tpl-sidebar .cv-left .cv-summary{color:#bbb}
 
 <script>
 let avatarDataUrl=null;
-let exps=[{id:1,company:'Công ty ABC Tech',pos:'Frontend Developer',from:'01/2022',to:'Hiện tại',desc:'Phát triển giao diện React/Vue cho hơn 10 dự án. Tối ưu performance, giảm load time 40%. Làm việc với Figma, Jira.'}];
+let exps=[{id:1,company:'Công ty ABC Tech',pos:'Frontend Developer',from:'01/2022',to:'Hiện tại',desc:'Phát triển giao diện React/Vue cho hơn 10 dự án. Tối ưu performance, giảm load time 40%.'}];
 let edus=[{id:1,school:'Đại học Gia Định',major:'Digital Marketing',year:'2018-2022',gpa:'3.6/4.0'}];
 let skills=[{name:'React / Vue.js',level:90},{name:'JavaScript / TypeScript',level:85},{name:'Node.js',level:70},{name:'UI/UX Design',level:75}];
 let langs=[{lang:'Tiếng Anh',level:'Thành thạo'},{lang:'Tiếng Việt',level:'Bản ngữ'}];
@@ -366,6 +383,24 @@ function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('overlay').classList.toggle('show');
 }
+
+function scrollTabs(direction){
+  const container=document.getElementById('tabs-container');
+  const scrollAmount=150;
+  container.scrollBy({left:direction*scrollAmount,behavior:'smooth'});
+  updateTabsScroll();
+}
+
+function updateTabsScroll(){
+  const container=document.getElementById('tabs-container');
+  const prevBtn=document.getElementById('tabs-prev');
+  const nextBtn=document.getElementById('tabs-next');
+  
+  if(!prevBtn||!nextBtn)return;
+  prevBtn.disabled=container.scrollLeft<=0;
+  nextBtn.disabled=container.scrollLeft+container.clientWidth>=container.scrollWidth-5;
+}
+
 function handleAvatar(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
@@ -398,7 +433,7 @@ function addEdu(){edus.push({id:Date.now(),school:'',major:'',year:'',gpa:''});r
 function delEdu(id){edus=edus.filter(e=>e.id!==id);renderSidebar();render();}
 function addSkill(){const v=document.getElementById('skill-input').value.trim();if(!v)return;skills.push({name:v,level:80});document.getElementById('skill-input').value='';renderSidebar();render();}
 function delSkill(i){skills.splice(i,1);renderSidebar();render();}
-function addLang(){const l=document.getElementById('lang-input').value.trim();const lv=document.getElementById('lang-level').value;if(!l)return;langs.push({lang:l,level:lv});document.getElementById('lang-input').value='';renderSidebar();render();}
+function addLang(){const l=document.getElementById('lang-input').value.trim();const lv=document.getElementById('lang-level').value;if(!l)return;langs.push({lang:l,level:lv});document.getElementById('lang-input').value='';document.getElementById('lang-level').value='Thành thạo';renderSidebar();render();}
 function delLang(i){langs.splice(i,1);renderSidebar();render();}
 function setTemplate(t,el){
   currentTpl=t;document.body.className='tpl-'+t;
@@ -476,7 +511,7 @@ function render(){
   document.getElementById('cv-lang-content').innerHTML=langs.map(l=>`<div class="cv-lang"><span>${l.lang}</span><span class="cv-lang-level" style="color:${currentAccent}">${l.level}</span></div>`).join('');
   document.getElementById('cv-lang-section').style.display=langs.length?'block':'none';
   document.getElementById('cv-exp-content').innerHTML=exps.map(e=>`<div class="cv-entry"><div class="cv-entry-title">${e.pos||'Chức vụ'}</div><div class="cv-entry-sub" style="color:${currentAccent}">${e.company||'Công ty'}</div><div class="cv-entry-date">${e.from}${e.to?' - '+e.to:''}</div><div class="cv-entry-desc">${e.desc}</div></div>`).join('');
-  document.getElementById('cv-edu-content').innerHTML=edus.map(e=>`<div class="cv-entry"><div class="cv-entry-title">${e.school||'Trường học'}</div><div class="cv-entry-sub" style="color:${currentAccent}">${e.major||'Ngành'}</div><div class="cv-entry-date">${e.year}${e.gpa?' - '+e.gpa:''}</div></div>`).join('');
+  document.getElementById('cv-edu-content').innerHTML=edus.map(e=>`<div class="cv-entry"><div class="cv-entry-title">${e.school||'Trường học'}</div><div class="cv-entry-sub" style="color:${currentAccent}">${e.major||'Ngành học'}</div><div class="cv-entry-date">${e.year}</div><div class="cv-entry-desc">${e.gpa?'GPA: '+e.gpa:''}</div></div>`).join('');
   document.querySelectorAll('.cv-sec-title').forEach(t=>t.style.color=currentAccent);
 }
 
@@ -491,6 +526,8 @@ function exportPDF(){
 
 renderSidebar();render();autoZoom();
 window.addEventListener('resize',autoZoom);
+document.getElementById('tabs-container').addEventListener('scroll',updateTabsScroll);
+window.addEventListener('load',updateTabsScroll);
 </script>
 </body>
 </html>
