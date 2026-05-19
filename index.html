@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Builder Pro</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222;min-height:100vh}
+  .app{display:flex;height:100vh;overflow:hidden}
+  .sidebar{width:380px;min-width:320px;background:#fff;border-right:1px solid #e0e0e0;overflow-y:auto;display:flex;flex-direction:column}
+  .sidebar-header{padding:18px 20px 14px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:10px;position:sticky;top:0;background:#fff;z-index:10}
+  .sidebar-header h1{font-size:16px;font-weight:600;color:#1a1a2e}
+  .logo{width:28px;height:28px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700}
+  .tabs{display:flex;padding:10px 20px 0;gap:4px;border-bottom:1px solid #eee;overflow-x:auto}
+  .tab{padding:7px 13px;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;border-radius:8px 8px 0 0;color:#777;white-space:nowrap;border-bottom:2px solid transparent}
+  .tab.active{color:#667eea;border-bottom:2px solid #667eea;background:#f5f4ff}
+  .tab-content{display:none;padding:16px 20px;flex:1}
+  .tab-content.active{display:block}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:11px;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+  .field input,.field textarea,.field select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;color:#222;background:#fafafa;transition:border .2s}
+  .field input:focus,.field textarea:focus{outline:none;border-color:#667eea;background:#fff}
+  .field textarea{resize:vertical;min-height:70px;line-height:1.5}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .section-title{font-size:13px;font-weight:600;color:#1a1a2e;margin:18px 0 10px;display:flex;justify-content:space-between;align-items:center}
+  .add-btn{font-size:11px;padding:4px 10px;background:#667eea;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500}
+  .add-btn:hover{background:#5567d4}
+  .item-card{background:#f8f9ff;border:1px solid #e8e8f0;border-radius:10px;padding:12px;margin-bottom:10px;position:relative}
+  .item-card .del-btn{position:absolute;top:8px;right:8px;background:none;border:none;color:#bbb;cursor:pointer;font-size:16px;line-height:1}
+  .item-card .del-btn:hover{color:#e55}
+  .skill-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .skill-tag{background:#ede9ff;color:#5548c8;font-size:12px;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px}
+  .skill-tag button{background:none;border:none;cursor:pointer;color:#9991e8;font-size:12px;line-height:1;padding:0}
+  .skill-input-row{display:flex;gap:6px}
+  .skill-input-row input{flex:1}
+  .skill-input-row button{padding:8px 12px;background:#667eea;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px}
+  .template-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+  .tpl-card{border:2px solid #e0e0e0;border-radius:10px;padding:10px;cursor:pointer;text-align:center;transition:all .2s}
+  .tpl-card.selected{border-color:#667eea;background:#f5f4ff}
+  .tpl-card .tpl-preview{height:60px;border-radius:6px;margin-bottom:6px}
+  .tpl-card span{font-size:11px;font-weight:600;color:#555}
+  .accent-row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .accent-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:3px solid transparent}
+  .accent-dot.selected{border-color:#333}
+  .export-btn{margin:16px 20px;padding:11px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s}
+  .export-btn:hover{opacity:.9}
+  .preview-area{flex:1;overflow-y:auto;background:#e8eaf0;display:flex;flex-direction:column;align-items:center;padding:24px 20px}
+  .preview-toolbar{width:100%;max-width:720px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .preview-toolbar span{font-size:12px;color:#888;font-weight:500}
+  .zoom-btns{display:flex;gap:6px}
+  .zoom-btns button{width:28px;height:28px;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer;font-size:14px}
+  #cv-page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.12);border-radius:4px;transform-origin:top center;transition:transform .2s}
+  .cv-header{padding:36px 40px 28px;display:flex;align-items:center;gap:24px}
+  .cv-avatar{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;flex-shrink:0;text-transform:uppercase;overflow:hidden}
+  .cv-name{font-size:26px;font-weight:700;color:#1a1a2e;margin-bottom:4px}
+  .cv-title{font-size:14px;font-weight:500;opacity:.85;margin-bottom:10px}
+  .cv-contacts{display:flex;flex-wrap:wrap;gap:10px}
+  .cv-contact{font-size:11.5px;display:flex;align-items:center;gap:4px;color:#555}
+  .cv-body{display:grid;grid-template-columns:1fr 2fr;gap:0}
+  .cv-left{padding:0 0 36px 40px}
+  .cv-right{padding:0 40px 36px 28px;border-left:1px solid #eee}
+  .cv-section{margin-bottom:22px}
+  .cv-sec-title{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px;padding-bottom:5px;border-bottom:2px solid currentColor}
+  .cv-entry{margin-bottom:14px}
+  .cv-entry-title{font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:1px}
+  .cv-entry-sub{font-size:11.5px;font-weight:600;margin-bottom:2px}
+  .cv-entry-date{font-size:10.5px;color:#888;margin-bottom:4px}
+  .cv-entry-desc{font-size:11.5px;color:#444;line-height:1.55}
+  .cv-skill-item{margin-bottom:8px}
+  .cv-skill-name{font-size:11.5px;font-weight:600;color:#333;margin-bottom:3px}
+  .cv-skill-bar{height:4px;background:#eee;border-radius:2px;overflow:hidden}
+  .cv-skill-fill{height:100%;border-radius:2px;width:80%}
+  .cv-summary{font-size:12px;color:#444;line-height:1.65}
+  .cv-lang{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:6px}
+  .cv-lang-level{font-weight:600}
+  body.tpl-modern .cv-header{background:linear-gradient(135deg,var(--accent),#764ba2)}
+  body.tpl-modern .cv-name{color:#fff}
+  body.tpl-modern .cv-title{color:rgba(255,255,255,.85)}
+  body.tpl-modern .cv-contact{color:rgba(255,255,255,.85)}
+  body.tpl-classic .cv-header{background:#f8f8f8;border-bottom:3px solid var(--accent)}
+  body.tpl-classic .cv-avatar{border:3px solid var(--accent)}
+  body.tpl-minimal .cv-header{border-left:5px solid var(--accent);padding-left:35px}
+  body.tpl-minimal .cv-avatar{display:none}
+  body.tpl-sidebar .cv-left{background:#1a1a2e;padding-top:24px}
+  body.tpl-sidebar .cv-left .cv-sec-title{color:#ccc!important}
+  body.tpl-sidebar .cv-left .cv-skill-name{color:#eee}
+  body.tpl-sidebar .cv-left .cv-entry-title{color:#fff}
+  body.tpl-sidebar .cv-left .cv-entry-sub{color:#ccc}
+  body.tpl-sidebar .cv-left .cv-entry-date{color:#aaa}
+  body.tpl-sidebar .cv-left .cv-entry-desc{color:#bbb}
+  body.tpl-sidebar .cv-left .cv-contact{color:#ccc}
+  body.tpl-sidebar .cv-left .cv-summary{color:#bbb}
+</style>
+</head>
+<body class="tpl-modern" style="--accent:#667eea">
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">CV</div>
+      <h1>CV Builder Pro</h1>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('personal')">👤 Cá nhân</button>
+      <button class="tab" onclick="switchTab('experience')">💼 Kinh nghiệm</button>
+      <button class="tab" onclick="switchTab('education')">🎓 Học vấn</button>
+      <button class="tab" onclick="switchTab('skills')">⚡ Kỹ năng</button>
+      <button class="tab" onclick="switchTab('design')">🎨 Thiết kế</button>
+    </div>
+
+    <div class="tab-content active" id="tab-personal">
+      <div class="field">
+        <label>Ảnh đại diện</label>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
+          <div id="avatar-preview" style="width:64px;height:64px;border-radius:50%;background:#ede9ff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#667eea;overflow:hidden;flex-shrink:0;border:2px dashed #c4b8f5;cursor:pointer" onclick="document.getElementById('avatar-input').click()">+</div>
+          <div>
+            <button onclick="document.getElementById('avatar-input').click()" style="padding:7px 14px;background:#667eea;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">Tải ảnh lên</button>
+            <button id="remove-avatar-btn" onclick="removeAvatar()" style="display:none;padding:7px 12px;background:none;color:#e55;border:1px solid #e55;border-radius:8px;cursor:pointer;font-size:12px;margin-left:6px">Xoá</button>
+            <p style="font-size:11px;color:#999;margin-top:5px">JPG, PNG — tối đa 5MB</p>
+          </div>
+        </div>
+        <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="handleAvatar(this)">
+      </div>
+      <div class="field"><label>Họ và tên</label><input id="f-name" oninput="render()" placeholder="Nguyễn Văn An"></div>
+      <div class="field"><label>Chức danh</label><input id="f-title" oninput="render()" placeholder="Senior Frontend Developer"></div>
+      <div class="field"><label>Email</label><input id="f-email" oninput="render()" placeholder="an@email.com"></div>
+      <div class="row2">
+        <div class="field"><label>Điện thoại</label><input id="f-phone" oninput="render()" placeholder="0912 345 678"></div>
+        <div class="field"><label>Địa chỉ</label><input id="f-address" oninput="render()" placeholder="TP.HCM"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>LinkedIn</label><input id="f-linkedin" oninput="render()" placeholder="linkedin.com/in/..."></div>
+        <div class="field"><label>Website/GitHub</label><input id="f-website" oninput="render()" placeholder="github.com/..."></div>
+      </div>
+      <div class="field"><label>Tóm tắt bản thân</label><textarea id="f-summary" oninput="render()" placeholder="Giới thiệu ngắn gọn về bạn..."></textarea></div>
+    </div>
+
+    <div class="tab-content" id="tab-experience">
+      <div class="section-title">Kinh nghiệm làm việc <button class="add-btn" onclick="addExp()">+ Thêm</button></div>
+      <div id="exp-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-education">
+      <div class="section-title">Học vấn <button class="add-btn" onclick="addEdu()">+ Thêm</button></div>
+      <div id="edu-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-skills">
+      <div class="section-title">Kỹ năng chuyên môn</div>
+      <div id="skill-list"></div>
+      <div class="skill-input-row">
+        <input id="skill-input" placeholder="Thêm kỹ năng..." onkeydown="if(event.key==='Enter')addSkill()">
+        <button onclick="addSkill()">+</button>
+      </div>
+      <div class="section-title" style="margin-top:20px">Ngôn ngữ</div>
+      <div id="lang-list"></div>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <input id="lang-input" placeholder="Ngôn ngữ" style="flex:1;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px">
+        <select id="lang-level" style="padding:8px;border:1px solid #ddd;border-radius:8px;font-size:12px;background:#fafafa">
+          <option>Cơ bản</option><option>Giao tiếp</option><option selected>Thành thạo</option><option>Bản ngữ</option>
+        </select>
+        <button onclick="addLang()" style="padding:8px 12px;background:#667eea;color:#fff;border:none;border-radius:8px;cursor:pointer">+</button>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-design">
+      <div class="section-title">Mẫu CV</div>
+      <div class="template-grid">
+        <div class="tpl-card selected" onclick="setTemplate('modern',this)">
+          <div class="tpl-preview" style="background:linear-gradient(135deg,#667eea,#764ba2)"></div>
+          <span>Modern</span>
+        </div>
+        <div class="tpl-card" onclick="setTemplate('classic',this)">
+          <div class="tpl-preview" style="background:#f0f0f0;border-top:4px solid #667eea"></div>
+          <span>Classic</span>
+        </div>
+        <div class="tpl-card" onclick="setTemplate('minimal',this)">
+          <div class="tpl-preview" style="background:#fff;border-left:4px solid #667eea"></div>
+          <span>Minimal</span>
+        </div>
+        <div class="tpl-card" onclick="setTemplate('sidebar',this)">
+          <div class="tpl-preview" style="background:linear-gradient(90deg,#1a1a2e 40%,#f5f5f5 40%)"></div>
+          <span>Sidebar</span>
+        </div>
+      </div>
+      <div class="section-title" style="margin-top:20px">Màu sắc chủ đạo</div>
+      <div class="accent-row">
+        <div class="accent-dot selected" style="background:#667eea" data-color="#667eea" onclick="setAccent(this)"></div>
+        <div class="accent-dot" style="background:#e74c3c" data-color="#e74c3c" onclick="setAccent(this)"></div>
+        <div class="accent-dot" style="background:#27ae60" data-color="#27ae60" onclick="setAccent(this)"></div>
+        <div class="accent-dot" style="background:#f39c12" data-color="#f39c12" onclick="setAccent(this)"></div>
+        <div class="accent-dot" style="background:#1abc9c" data-color="#1abc9c" onclick="setAccent(this)"></div>
+        <div class="accent-dot" style="background:#2c3e50" data-color="#2c3e50" onclick="setAccent(this)"></div>
+        <div class="accent-dot" style="background:#e91e8c" data-color="#e91e8c" onclick="setAccent(this)"></div>
+        <div class="accent-dot" style="background:#ff6b35" data-color="#ff6b35" onclick="setAccent(this)"></div>
+      </div>
+      <div class="section-title" style="margin-top:20px">Font chữ</div>
+      <div class="field">
+        <select id="font-select" onchange="setFont()">
+          <option value="'Segoe UI',sans-serif">Segoe UI (Mặc định)</option>
+          <option value="Georgia,serif">Georgia (Serif)</option>
+          <option value="'Courier New',monospace">Courier New (Mono)</option>
+          <option value="Arial,sans-serif">Arial</option>
+          <option value="'Times New Roman',serif">Times New Roman</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="export-btn" onclick="exportPDF()">⬇️ Xuất PDF</button>
+  </div>
+
+  <div class="preview-area">
+    <div class="preview-toolbar">
+      <span>Xem trước CV</span>
+      <div class="zoom-btns">
+        <button onclick="zoom(-0.1)">−</button>
+        <button onclick="zoom(0.1)">+</button>
+        <button onclick="zoomLevel=0.85;applyZoom()">⊡</button>
+      </div>
+    </div>
+    <div id="cv-page">
+      <div class="cv-header">
+        <div class="cv-avatar" id="cv-avatar" style="background:rgba(255,255,255,.25)">VA</div>
+        <div style="flex:1">
+          <div class="cv-name" id="cv-name">Nguyễn Văn An</div>
+          <div class="cv-title" id="cv-title" style="color:rgba(255,255,255,.85)">Senior Frontend Developer</div>
+          <div class="cv-contacts" id="cv-contacts">
+            <span class="cv-contact">✉ an@email.com</span>
+            <span class="cv-contact">📱 0912 345 678</span>
+            <span class="cv-contact">📍 TP.HCM</span>
+          </div>
+        </div>
+      </div>
+      <div class="cv-body">
+        <div class="cv-left">
+          <div class="cv-section" id="cv-left-summary"></div>
+          <div class="cv-section" id="cv-skills-section">
+            <div class="cv-sec-title" style="color:#667eea">Kỹ năng</div>
+            <div id="cv-skills-content"></div>
+          </div>
+          <div class="cv-section" id="cv-lang-section">
+            <div class="cv-sec-title" style="color:#667eea">Ngôn ngữ</div>
+            <div id="cv-lang-content"></div>
+          </div>
+        </div>
+        <div class="cv-right">
+          <div class="cv-section" id="cv-exp-section">
+            <div class="cv-sec-title" style="color:#667eea">Kinh nghiệm</div>
+            <div id="cv-exp-content"></div>
+          </div>
+          <div class="cv-section" id="cv-edu-section">
+            <div class="cv-sec-title" style="color:#667eea">Học vấn</div>
+            <div id="cv-edu-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let avatarDataUrl=null;
+let exps=[{id:1,company:'Công ty ABC Tech',pos:'Frontend Developer',from:'01/2022',to:'Hiện tại',desc:'Phát triển giao diện React/Vue cho hơn 10 dự án. Tối ưu performance, giảm load time 40%.'}];
+let edus=[{id:1,school:'Đại học Bách Khoa TP.HCM',major:'Kỹ thuật Phần mềm',year:'2018-2022',gpa:'3.6/4.0'}];
+let skills=[{name:'React / Vue.js',level:90},{name:'JavaScript / TypeScript',level:85},{name:'Node.js',level:70},{name:'UI/UX Design',level:75}];
+let langs=[{lang:'Tiếng Anh',level:'Thành thạo'},{lang:'Tiếng Việt',level:'Bản ngữ'}];
+let currentTpl='modern',currentAccent='#667eea',zoomLevel=0.85;
+
+function handleAvatar(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    avatarDataUrl=e.target.result;
+    const p=document.getElementById('avatar-preview');
+    p.innerHTML=`<img src="${avatarDataUrl}" style="width:100%;height:100%;object-fit:cover">`;
+    p.style.border='2px solid #667eea';
+    document.getElementById('remove-avatar-btn').style.display='inline-block';
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+function removeAvatar(){
+  avatarDataUrl=null;
+  const p=document.getElementById('avatar-preview');
+  p.innerHTML='+';p.style.border='2px dashed #c4b8f5';
+  document.getElementById('remove-avatar-btn').style.display='none';
+  document.getElementById('avatar-input').value='';
+  render();
+}
+function switchTab(name){
+  const names=['personal','experience','education','skills','design'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+function addExp(){exps.push({id:Date.now(),company:'',pos:'',from:'',to:'',desc:''});renderSidebar();render();}
+function delExp(id){exps=exps.filter(e=>e.id!==id);renderSidebar();render();}
+function addEdu(){edus.push({id:Date.now(),school:'',major:'',year:'',gpa:''});renderSidebar();render();}
+function delEdu(id){edus=edus.filter(e=>e.id!==id);renderSidebar();render();}
+function addSkill(){const v=document.getElementById('skill-input').value.trim();if(!v)return;skills.push({name:v,level:80});document.getElementById('skill-input').value='';renderSidebar();render();}
+function delSkill(i){skills.splice(i,1);renderSidebar();render();}
+function addLang(){const l=document.getElementById('lang-input').value.trim();const lv=document.getElementById('lang-level').value;if(!l)return;langs.push({lang:l,level:lv});document.getElementById('lang-input').value='';renderSidebar();render();}
+function delLang(i){langs.splice(i,1);renderSidebar();render();}
+function setTemplate(t,el){
+  currentTpl=t;document.body.className='tpl-'+t;
+  document.querySelectorAll('.tpl-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');render();
+}
+function setAccent(el){
+  currentAccent=el.dataset.color;
+  document.body.style.setProperty('--accent',currentAccent);
+  document.querySelectorAll('.accent-dot').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected');
+  document.querySelectorAll('.cv-sec-title').forEach(t=>t.style.color=currentAccent);
+}
+function setFont(){document.getElementById('cv-page').style.fontFamily=document.getElementById('font-select').value;}
+function zoom(d){zoomLevel=Math.min(1.2,Math.max(0.5,zoomLevel+d));applyZoom();}
+function applyZoom(){document.getElementById('cv-page').style.transform=`scale(${zoomLevel})`;}
+function getInitials(n){return(n||'').split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase()||'?';}
+
+function renderSidebar(){
+  document.getElementById('exp-list').innerHTML=exps.map(e=>`
+    <div class="item-card">
+      <button class="del-btn" onclick="delExp(${e.id})">×</button>
+      <div class="field"><label>Công ty</label><input value="${e.company||''}" oninput="exps.find(x=>x.id==${e.id}).company=this.value;render()" placeholder="Tên công ty"></div>
+      <div class="field"><label>Vị trí</label><input value="${e.pos||''}" oninput="exps.find(x=>x.id==${e.id}).pos=this.value;render()" placeholder="Chức vụ"></div>
+      <div class="row2">
+        <div class="field"><label>Từ</label><input value="${e.from||''}" oninput="exps.find(x=>x.id==${e.id}).from=this.value;render()" placeholder="MM/YYYY"></div>
+        <div class="field"><label>Đến</label><input value="${e.to||''}" oninput="exps.find(x=>x.id==${e.id}).to=this.value;render()" placeholder="Hiện tại"></div>
+      </div>
+      <div class="field"><label>Mô tả</label><textarea oninput="exps.find(x=>x.id==${e.id}).desc=this.value;render()" placeholder="Mô tả công việc...">${e.desc||''}</textarea></div>
+    </div>`).join('');
+  document.getElementById('edu-list').innerHTML=edus.map(e=>`
+    <div class="item-card">
+      <button class="del-btn" onclick="delEdu(${e.id})">×</button>
+      <div class="field"><label>Trường</label><input value="${e.school||''}" oninput="edus.find(x=>x.id==${e.id}).school=this.value;render()" placeholder="Tên trường"></div>
+      <div class="field"><label>Ngành</label><input value="${e.major||''}" oninput="edus.find(x=>x.id==${e.id}).major=this.value;render()" placeholder="Ngành học"></div>
+      <div class="row2">
+        <div class="field"><label>Năm</label><input value="${e.year||''}" oninput="edus.find(x=>x.id==${e.id}).year=this.value;render()" placeholder="2018-2022"></div>
+        <div class="field"><label>GPA</label><input value="${e.gpa||''}" oninput="edus.find(x=>x.id==${e.id}).gpa=this.value;render()" placeholder="3.6/4.0"></div>
+      </div>
+    </div>`).join('');
+  document.getElementById('skill-list').innerHTML=`<div class="skill-tags">${skills.map((s,i)=>`<span class="skill-tag">${s.name}<button onclick="delSkill(${i})">×</button></span>`).join('')}</div>`;
+  document.getElementById('lang-list').innerHTML=`<div class="skill-tags">${langs.map((l,i)=>`<span class="skill-tag">${l.lang} · ${l.level}<button onclick="delLang(${i})">×</button></span>`).join('')}</div>`;
+}
+
+function render(){
+  const name=document.getElementById('f-name').value||'Nguyễn Văn An';
+  const title=document.getElementById('f-title').value||'Chức danh của bạn';
+  const email=document.getElementById('f-email').value;
+  const phone=document.getElementById('f-phone').value;
+  const addr=document.getElementById('f-address').value;
+  const linkedin=document.getElementById('f-linkedin').value;
+  const website=document.getElementById('f-website').value;
+  const summary=document.getElementById('f-summary').value;
+  document.getElementById('cv-name').textContent=name;
+  document.getElementById('cv-title').textContent=title;
+  const av=document.getElementById('cv-avatar');
+  if(avatarDataUrl){av.innerHTML=`<img src="${avatarDataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;av.style.background='transparent';}
+  else{av.innerHTML=getInitials(name);av.style.background=currentAccent+'55';}
+  const contacts=[];
+  if(email)contacts.push(`✉ ${email}`);
+  if(phone)contacts.push(`📱 ${phone}`);
+  if(addr)contacts.push(`📍 ${addr}`);
+  if(linkedin)contacts.push(`🔗 ${linkedin}`);
+  if(website)contacts.push(`🌐 ${website}`);
+  document.getElementById('cv-contacts').innerHTML=contacts.map(c=>`<span class="cv-contact">${c}</span>`).join('');
+  document.getElementById('cv-left-summary').innerHTML=summary?`<div class="cv-sec-title" style="color:${currentAccent}">Giới thiệu</div><p class="cv-summary">${summary}</p>`:'';
+  document.getElementById('cv-skills-content').innerHTML=skills.map(s=>`<div class="cv-skill-item"><div class="cv-skill-name">${s.name}</div><div class="cv-skill-bar"><div class="cv-skill-fill" style="background:${currentAccent};width:${s.level}%"></div></div></div>`).join('');
+  document.getElementById('cv-skills-section').style.display=skills.length?'block':'none';
+  document.getElementById('cv-lang-content').innerHTML=langs.map(l=>`<div class="cv-lang"><span>${l.lang}</span><span class="cv-lang-level" style="color:${currentAccent}">${l.level}</span></div>`).join('');
+  document.getElementById('cv-lang-section').style.display=langs.length?'block':'none';
+  document.getElementById('cv-exp-content').innerHTML=exps.map(e=>`<div class="cv-entry"><div class="cv-entry-title">${e.pos||'Chức vụ'}</div><div class="cv-entry-sub" style="color:${currentAccent}">${e.company||'Công ty'}</div>${e.from||e.to?`<div class="cv-entry-date">${e.from||''} — ${e.to||''}</div>`:''}${e.desc?`<div class="cv-entry-desc">${e.desc}</div>`:''}</div>`).join('');
+  document.getElementById('cv-edu-content').innerHTML=edus.map(e=>`<div class="cv-entry"><div class="cv-entry-title">${e.school||'Trường học'}</div><div class="cv-entry-sub" style="color:${currentAccent}">${e.major||'Ngành học'}</div>${e.year?`<div class="cv-entry-date">${e.year}</div>`:''}${e.gpa?`<div class="cv-entry-desc">GPA: ${e.gpa}</div>`:''}</div>`).join('');
+  document.querySelectorAll('.cv-sec-title').forEach(t=>t.style.color=currentAccent);
+}
+
+function exportPDF(){
+  const el=document.getElementById('cv-page');
+  const name=document.getElementById('f-name').value||'CV';
+  const orig=el.style.transform;
+  el.style.transform='scale(1)';
+  html2pdf().set({margin:0,filename:`${name.replace(/\s+/g,'_')}_CV.pdf`,image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(el).save().then(()=>{el.style.transform=orig});
+}
+
+renderSidebar();render();applyZoom();
+</script>
+</body>
+</html>
